@@ -12,13 +12,14 @@
         </processorPath>
         <module name="post-service" />
       </profile>
-      <profile name="Annotation profile for comment-service" enabled="true">
+      <profile name="Annotation profile for like-service" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="false">
           <entry name="/home/yfigueira/.m2/repository/org/projectlombok/lombok/unknown/lombok-unknown.jar" />
         </processorPath>
+        <module name="like-service" />
         <module name="comment-service" />
       </profile>
     </annotationProcessing>
@@ -26,6 +27,7 @@
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="comment-service" options="-parameters" />
+      <module name="like-service" options="-parameters" />
       <module name="post-service" options="-parameters" />
     </option>
   </component>
