@@ -50,7 +50,7 @@ jobs:
 
   build:
     name: Build Post API
-    runs-on: ubuntu-22:04
+    runs-on: ubuntu-22.04
     needs: [compile, unit-test]
     steps:
       - name: Checkout source code
