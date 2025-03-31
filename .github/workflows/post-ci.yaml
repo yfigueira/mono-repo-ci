@@ -28,7 +28,7 @@ jobs:
       - name: Compile project
         run: |
           cd post-service
-          mvn clean compile
+          ./mvnw clean compile
 
   unit-test:
     runs-on: ubuntu-22.04
@@ -48,4 +48,4 @@ jobs:
       - name: Run unit tests
         run: |
           cd post-service
-          mvn clean test
+          ./mvnw clean test
