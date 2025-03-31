@@ -10,8 +10,6 @@ class PostServiceApplicationTests {
 
 	@Test
 	void contextLoads() {
-		assertTrue(true);
-		assertTrue(true);
 	}
 
 }

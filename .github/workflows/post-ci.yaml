@@ -9,8 +9,8 @@ on:
 
 jobs:
   compile:
-    runs-on: ubuntu-22.04
     name: Compile Post API
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
@@ -22,8 +22,6 @@ jobs:
         with:
           java-version: 21
           distribution: 'corretto'
-#          cache: 'maven'
-#          cache-dependency-path: 'post-service/pom.xml'
 
       - name: Compile project
         run: |
@@ -31,8 +29,8 @@ jobs:
           mvn clean compile
 
   unit-test:
-    runs-on: ubuntu-22.04
     name: Run unit tests
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
@@ -49,3 +47,59 @@ jobs:
         run: |
           cd post-service
           mvn clean test
+
+  build:
+    name: Build Post API
+    runs-on: ubuntu-22:04
+    needs: [compile, unit-test]
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: 'corretto'
+
+      - name: Build Post API
+        run: |
+          cd post-service
+          mvn clean package
+
+  build-docker-image:
+    name: Build Post API Docker Image
+    runs-on: ubuntu-22.04
+    needs: [build]
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: 'corretto'
+
+      - name: Extract project version
+        id: extract_version
+        run: |
+          cd post-service
+          echo "VERSION=$(mvn -q -Dexec.executable='echo' -Dexec.args='${project.version}' --non-recursive exec:exec)" >> $GITHUB_OUTPUT
+
+      - name: Login to container registry
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push image to container registry
+        uses: docker/build-push-action@v6
+        with:
+          context: post-service
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/mono-repo-ci-post:${{ steps.extract_version.outputs.VERSION }}, ${{ secrets.DOCKERHUB_USERNAME }}/mono-repo-ci-post:latest
