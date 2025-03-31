@@ -29,3 +29,23 @@ jobs:
         run: |
           cd post-service
           ./mvnw clean compile
+
+  unit-test:
+    runs-on: ubuntu-22.04
+    name: Run unit tests
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: 'corretto'
+
+      - name: Run unit tests
+        run: |
+          cd post-service
+          ./mvnw clean test
