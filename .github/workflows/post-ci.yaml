@@ -22,10 +22,10 @@ jobs:
         with:
           java-version: 21
           distribution: 'corretto'
-          cache: 'maven'
-          cache-dependency-path: 'post-service/pom.xml'
+#          cache: 'maven'
+#          cache-dependency-path: 'post-service/pom.xml'
 
       - name: Compile project
         run: |
           cd post-service
-          mvn clean compile
+          ./mvnw clean compile
