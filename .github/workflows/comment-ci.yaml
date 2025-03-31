@@ -1,0 +1,105 @@
+name: Comment API Continuous Integration Pipeline
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - comment-service/**
+
+jobs:
+  compile:
+    name: Compile Comment API
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Compile source code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: 'corretto'
+
+      - name: Compile project
+        run: |
+          cd comment-service
+          mvn clean compile
+
+  unit-test:
+    name: Run unit tests
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: 'corretto'
+
+      - name: Run unit tests
+        run: |
+          cd comment-service
+          mvn clean test
+
+  build:
+    name: Build Comment API
+    runs-on: ubuntu-22.04
+    needs: [compile, unit-test]
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: 'corretto'
+
+      - name: Build Comment API
+        run: |
+          cd comment-service
+          mvn clean package
+
+  build-docker-image:
+    name: Build Comment API Docker Image
+    runs-on: ubuntu-22.04
+    needs: [build]
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: 'corretto'
+
+      - name: Extract project version
+        id: extract_version
+        run: |
+          cd comment-service
+          echo "VERSION=$(mvn -q -Dexec.executable='echo' -Dexec.args='${project.version}' --non-recursive exec:exec)" >> $GITHUB_OUTPUT
+
+      - name: Login to container registry
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push image to container registry
+        uses: docker/build-push-action@v6
+        with:
+          context: comment-service
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/mono-repo-ci-comment:${{ steps.extract_version.outputs.VERSION }}, ${{ secrets.DOCKERHUB_USERNAME }}/mono-repo-ci-comment:latest
