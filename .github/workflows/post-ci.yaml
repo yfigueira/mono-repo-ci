@@ -1,0 +1,31 @@
+name: Post API Continuous Integration Pipeline
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - post-service/**
+
+jobs:
+  compile:
+    runs-on: ubuntu-22.04
+    name: Compile Post API
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: 'corretto'
+          cache: 'maven'
+          cache-dependency-path: 'post-service/pom.xml'
+
+      - name: Compile project
+        run: |
+          cd post-service
+          mvn clean compile
